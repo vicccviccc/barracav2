@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; base-uri 'self'; form-action 'none'; object-src 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Barraca do Baiano</title>
+  <meta name="description" content="Veja o cardápio da Barraca do Baiano, monte seu pedido e envie pelo WhatsApp.">
+  <meta name="theme-color" content="#F2B90F">
+  <link rel="icon" type="image/png" sizes="48x48" href="assets/logo/favicon.png">
+  <link rel="apple-touch-icon" href="assets/logo/apple-touch-icon.png">
+  <link rel="preload" href="assets/fonts/lora-var.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/config.js" defer></script>
+  <script src="js/cardapio.js" defer></script>
+  <script src="js/carrinho.js" defer></script>
+  <script src="js/app.js" defer></script>
+</head>
+<body>
+
+<!-- Ícones (inline, para funcionar também abrindo o arquivo direto no computador) -->
+<svg class="sprite" aria-hidden="true" focusable="false" width="0" height="0">
+  <symbol id="i-bag" viewBox="0 0 24 24"><path d="M5.5 8h13l-1 12.5h-11z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20l1-4.5L16.5 4a2 2 0 0 1 3 3L8 18.5 4 20zM14.5 6l3.5 3.5"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5a7 7 0 1 0-14 0C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></symbol>
+  <symbol id="i-whatsapp" viewBox="0 0 32 32"><path d="M16.02 3C9.4 3 4 8.4 4 15.02c0 2.34.65 4.53 1.78 6.4L4 29l7.76-1.73a12 12 0 004.26.78h.01c6.62 0 12.02-5.4 12.02-12.03C28.05 8.4 22.65 3 16.02 3zm0 21.9h-.01a10 10 0 01-5.1-1.4l-.37-.22-4.6 1.03 1.03-4.48-.24-.38a9.9 9.9 0 01-1.53-5.33c0-5.5 4.48-9.98 9.99-9.98 2.67 0 5.17 1.04 7.06 2.93a9.93 9.93 0 012.93 7.06c0 5.5-4.48 9.97-9.99 9.97zm5.48-7.47c-.3-.15-1.77-.87-2.05-.97-.28-.1-.48-.15-.68.15-.2.3-.78.97-.96 1.17-.18.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.47-.89-.79-1.48-1.76-1.66-2.06-.17-.3-.02-.46.13-.6.14-.14.3-.35.45-.53.15-.18.2-.3.3-.5.1-.2.05-.38-.02-.53-.08-.15-.68-1.64-.94-2.24-.25-.6-.5-.5-.68-.51h-.58c-.2 0-.53.07-.8.38-.28.3-1.05 1.02-1.05 2.5s1.08 2.9 1.23 3.1c.15.2 2.12 3.24 5.15 4.54.72.31 1.28.5 1.72.64.72.23 1.38.2 1.9.12.58-.09 1.77-.72 2.02-1.42.25-.7.25-1.3.17-1.42-.07-.13-.27-.2-.57-.35z"/></symbol>
+</svg>
+
+<a class="pular" href="#cardapio">Pular para o cardápio</a>
+
+<header class="topo">
+  <div class="topo__in">
+    <a class="marca" href="#inicio" aria-label="Barraca do Baiano — voltar ao início">
+      <img src="assets/logo/icone.webp" width="44" height="44" alt="">
+      <span class="marca__nome">Barraca do Baiano</span>
+    </a>
+    <nav class="menu" aria-label="Principal">
+      <a href="#cardapio">Cardápio</a>
+      <a href="#localizacao">Localização</a>
+    </nav>
+    <button class="btn-pedido" type="button" data-abrir-pedido aria-haspopup="dialog">
+      <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-bag"/></svg>
+      <span class="btn-pedido__txt">Meu pedido</span>
+      <span class="contador" data-contador hidden>0</span>
+    </button>
+  </div>
+</header>
+
+<main id="conteudo">
+
+  <!-- INÍCIO -->
+  <section class="hero" id="inicio" aria-labelledby="hero-titulo">
+    <picture class="hero__foto">
+      <source media="(max-width: 700px)"
+              srcset="assets/lanchonete/barraca-retrato-600.webp 600w, assets/lanchonete/barraca-retrato-900.webp 900w"
+              sizes="100vw">
+      <img src="assets/lanchonete/barraca-1920.webp"
+           srcset="assets/lanchonete/barraca-1280.webp 1280w, assets/lanchonete/barraca-1920.webp 1920w"
+           sizes="100vw" width="1920" height="1080" fetchpriority="high"
+           alt="A Barraca do Baiano: balcão amarelo de onde saem os lanches e mesas brancas ao lado">
+    </picture>
+    <div class="container hero__cont">
+      <h1 id="hero-titulo" class="hero__logo">
+        <img src="assets/logo/logo-640.webp"
+             srcset="assets/logo/logo-360.webp 360w, assets/logo/logo-640.webp 640w"
+             sizes="(max-width: 700px) 240px, 340px" width="640" height="640" alt="Barraca do Baiano">
+      </h1>
+      <p class="hero__frase">Monte seu pedido aqui e envie pelo WhatsApp.</p>
+      <div class="hero__acoes">
+        <a class="btn btn--amarelo" href="#cardapio">Fazer pedido</a>
+        <a class="btn btn--vazado" href="#localizacao" data-link-maps>
+          <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-pin"/></svg>
+          Como chegar
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <div class="faixa" id="faixa-horario"></div>
+
+  <!-- DESTAQUE: o que todo hambúrguer leva -->
+  <section class="destaque" aria-labelledby="destaque-titulo">
+    <div class="container destaque__grade">
+      <figure class="destaque__foto">
+        <img src="assets/produtos/lanches-900.webp"
+             srcset="assets/produtos/lanches-560.webp 560w, assets/produtos/lanches-900.webp 900w"
+             sizes="(min-width: 860px) 480px, 92vw" width="900" height="1200" loading="lazy" decoding="async"
+             alt="Quatro lanches da Barraca do Baiano vistos de cima, embalados em sacos plásticos, com alface, milho, ervilha e batata palha à mostra">
+      </figure>
+      <div class="destaque__txt">
+        <p class="rotulo">Hambúrgueres</p>
+        <h2 id="destaque-titulo">Todo hambúrguer leva</h2>
+        <ul class="ingredientes" id="ingredientes-comuns"></ul>
+        <p>Na hora do pedido você pode tirar ingredientes e acrescentar ovo ou carne de hambúrguer.</p>
+        <a class="btn btn--escuro" href="#hamburgueres">
+          Ver hambúrgueres
+          <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-down"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CARDÁPIO -->
+  <section class="cardapio" id="cardapio" aria-labelledby="cardapio-titulo">
+    <div class="container cardapio__cab">
+      <h2 id="cardapio-titulo">Cardápio</h2>
+      <p>Escolha o lanche, ajuste do seu jeito e envie o pedido pelo WhatsApp. A Barraca do Baiano confirma preço e disponibilidade na conversa.</p>
+    </div>
+    <nav class="abas" id="abas" aria-label="Categorias do cardápio"></nav>
+    <div class="container" id="cardapio-lista">
+      <noscript><p class="aviso-js">Ative o JavaScript neste navegador para ver o cardápio e montar o pedido.</p></noscript>
+    </div>
+  </section>
+
+  <!-- LOCALIZAÇÃO E CONTATO -->
+  <section class="local" id="localizacao" aria-labelledby="local-titulo">
+    <div class="container local__grade">
+      <figure class="local__foto">
+        <picture>
+          <source media="(min-width: 860px)" srcset="assets/lanchonete/barraca-retrato-900.webp" sizes="480px">
+          <img src="assets/lanchonete/barraca-retrato-600.webp" width="600" height="844" loading="lazy" decoding="async"
+               alt="Balcão amarelo da Barraca do Baiano, com a cozinha à vista e o piso de cerâmica ao lado">
+        </picture>
+      </figure>
+      <div class="local__info">
+        <p class="rotulo">Contato</p>
+        <h2 id="local-titulo">Localização e contato</h2>
+
+        <div class="info-bloco">
+          <h3><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-clock"/></svg> Horário</h3>
+          <ul class="horarios" id="lista-horarios"></ul>
+        </div>
+
+        <div class="info-bloco">
+          <h3><svg class="icon icon--fill" aria-hidden="true" focusable="false"><use href="#i-whatsapp"/></svg> WhatsApp</h3>
+          <p class="telefone" id="telefone"></p>
+        </div>
+
+        <div class="local__acoes">
+          <a class="btn btn--escuro" href="#localizacao" data-link-maps>
+            <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-pin"/></svg>
+            Como chegar
+          </a>
+          <a class="btn btn--amarelo" href="#localizacao" data-link-whats>
+            <svg class="icon icon--fill" aria-hidden="true" focusable="false"><use href="#i-whatsapp"/></svg>
+            Chamar no WhatsApp
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="rodape">
+  <div class="container rodape__grade">
+    <div class="rodape__marca">
+      <img src="assets/logo/logo-360.webp" width="360" height="360" loading="lazy" decoding="async" alt="Barraca do Baiano">
+    </div>
+    <div>
+      <h2 class="rodape__tit">Contato</h2>
+      <p id="rodape-telefone"></p>
+      <p><a href="#localizacao" data-link-maps>Como chegar</a></p>
+    </div>
+    <div>
+      <h2 class="rodape__tit">Horário</h2>
+      <ul class="horarios horarios--claro" id="rodape-horarios"></ul>
+    </div>
+    <nav aria-label="Rodapé">
+      <h2 class="rodape__tit">No site</h2>
+      <ul class="rodape__links">
+        <li><a href="#inicio">Início</a></li>
+        <li><a href="#cardapio">Cardápio</a></li>
+        <li><a href="#localizacao">Localização e contato</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="container rodape__fim">
+    <p>Os pedidos enviados pelo site são solicitações: o preço, a disponibilidade e o total são confirmados pela Barraca do Baiano no WhatsApp.</p>
+  </div>
+</footer>
+
+<!-- Barra fixa com o resumo do pedido -->
+<div class="barra" id="barra-pedido" hidden>
+  <button class="barra__btn" type="button" data-abrir-pedido aria-haspopup="dialog">
+    <span class="barra__info">
+      <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-bag"/></svg>
+      <span id="barra-itens">0 itens</span>
+    </span>
+    <span class="barra__total" id="barra-total">R$ 0,00</span>
+    <span class="barra__acao">Ver pedido</span>
+  </button>
+</div>
+
+<!-- Janelas -->
+<dialog id="dlg-produto" class="folha" aria-labelledby="dlg-produto-titulo"></dialog>
+
+<dialog id="dlg-pedido" class="folha folha--lateral" aria-labelledby="dlg-pedido-titulo">
+  <div class="folha__cab">
+    <h2 id="dlg-pedido-titulo">Meu pedido</h2>
+    <button class="btn-icone" type="button" data-fechar aria-label="Fechar pedido">
+      <svg class="icon" aria-hidden="true" focusable="false"><use href="#i-close"/></svg>
+    </button>
+  </div>
+  <div class="folha__corpo" id="pedido-corpo"></div>
+  <div class="folha__rodape" id="pedido-rodape"></div>
+</dialog>
+
+<div class="aviso" id="aviso"></div>
+<div class="sr" id="aviso-sr" role="status" aria-live="polite"></div>
+
+</body>
+</html>
