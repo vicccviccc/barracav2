@@ -30,4 +30,5 @@ BB.config = Object.freeze({
   limiteLinhas: 40,
   limiteObsItem: 200,
   limiteObsPedido: 300,
+  limiteEndereco: 220,
 });

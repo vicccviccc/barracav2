@@ -32,7 +32,7 @@
 /* ---------- base ---------- */
 *, *::before, *::after { box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: var(--topo-h); -webkit-text-size-adjust: 100%; }
-html.travado { overflow: hidden; }
+html.travado, html.travado body { overflow: hidden; overscroll-behavior: none; }
 body {
   margin: 0;
   font: 400 1.0625rem/1.55 var(--corpo);
@@ -205,11 +205,12 @@ a { color: inherit; }
 .rodape :focus-visible { outline-color: var(--amarelo); box-shadow: 0 0 0 3px var(--tinta); }
 
 /* ---------- barra fixa do pedido ---------- */
-.barra { position: fixed; z-index: 60; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); }
+.barra { position: fixed; z-index: 60; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); pointer-events: none; }
 .barra__btn {
   width: 100%; min-height: 60px; display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 14px;
   padding: 0 8px 0 20px; background: var(--tinta); color: var(--branco); border: 3px solid var(--amarelo); border-radius: 999px;
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35); font: 700 1rem/1 var(--corpo); cursor: pointer; text-align: left;
+  pointer-events: auto; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
 }
 .barra__info { display: flex; align-items: center; gap: 10px; }
 .barra__total { font: 800 1.1rem/1 var(--titulo); font-variant-numeric: lining-nums; }
@@ -226,16 +227,22 @@ a { color: inherit; }
 
 /* ---------- janelas (produto e pedido) ---------- */
 dialog.folha {
-  border: 0; padding: 0; width: 100%; max-width: none; max-height: 92dvh; margin: auto 0 0;
+  border: 0; padding: 0; width: 100%; max-width: none; max-height: 92vh; max-height: 92dvh; margin: auto 0 0;
   background: var(--branco); color: var(--tinta); border-radius: 22px 22px 0 0; overflow: hidden;
+}
+/* No iPhone/Safari o painel de pedido como bottom-sheet podia perder a área rolável.
+   Em telas pequenas ele vira uma folha de tela inteira e só o miolo rola. */
+dialog#dlg-pedido {
+  width: 100%; height: 100vh; height: 100svh; height: 100dvh; max-height: none;
+  margin: 0; border-radius: 0;
 }
 dialog.folha[open] { display: flex; flex-direction: column; animation: sobe 0.25s ease-out; }
 dialog.folha::backdrop { background: rgba(30, 20, 4, 0.62); }
 @keyframes sobe { from { transform: translateY(40px); opacity: 0; } }
-.folha__cab { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px; background: var(--amarelo); border-bottom: 3px solid var(--tinta); }
+.folha__cab { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: max(16px, env(safe-area-inset-top)) 20px 16px; background: var(--amarelo); border-bottom: 3px solid var(--tinta); flex: 0 0 auto; }
 .folha__cab h2 { font-size: 1.5rem; text-transform: uppercase; }
-.folha__corpo { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 18px 20px 24px; }
-.folha__rodape { padding: 12px 20px calc(12px + env(safe-area-inset-bottom)); border-top: 3px solid var(--tinta); background: var(--branco); }
+.folha__corpo { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; touch-action: pan-y; padding: 18px 20px 28px; }
+.folha__rodape { padding: 12px 20px calc(12px + env(safe-area-inset-bottom)); border-top: 3px solid var(--tinta); background: var(--branco); flex: 0 0 auto; }
 .folha__foto { margin: -18px -20px 16px; border-bottom: 3px solid var(--tinta); background: #efe6d4; }
 .folha__foto img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
 .folha__desc { color: var(--tinta-2); margin-bottom: 18px; }
@@ -288,13 +295,20 @@ legend { padding: 0; margin-bottom: 4px; font: 800 1.05rem/1.2 var(--titulo); te
 .link-btn { display: inline-flex; align-items: center; gap: 5px; min-height: 44px; padding: 0 4px; background: transparent; border: 0; color: var(--tinta); font: 700 0.9rem/1 var(--corpo); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .link-btn .icon { width: 1.15em; height: 1.15em; }
 .pedido-obs { margin-top: 22px; }
-.pagamento { margin: 26px 0 0; padding: 22px 0 0; border-top: 2px dotted var(--linha); }
+.recebimento { margin: 24px 0 0; padding: 22px 0 0; border-top: 2px dotted var(--linha); }
+.recebimento legend { margin-bottom: 4px; }
+.recebimento__opcoes { grid-template-columns: 1fr; }
+.escolha--recebimento .escolha__txt { display: flex; flex-direction: column; gap: 2px; }
+.escolha--recebimento small { font-size: 0.78rem; font-weight: 600; color: var(--tinta-2); line-height: 1.25; }
+.entrega { margin-top: 16px; padding: 16px; border: 2px solid var(--linha); border-radius: 12px; background: var(--creme); }
+.campo--endereco { min-height: 96px; resize: vertical; }
+.pagamento { margin: 24px 0 0; padding: 22px 0 0; border-top: 2px dotted var(--linha); }
 .pagamento legend { margin-bottom: 4px; }
 .pagamento__opcoes { grid-template-columns: 1fr; }
 .escolha--pagamento .escolha__txt { display: flex; flex-direction: column; gap: 2px; }
 .escolha--pagamento small { font-size: 0.78rem; font-weight: 600; color: var(--tinta-2); line-height: 1.25; }
 .pagamento__subtitulo { margin: 18px 0 8px; }
-.troco { margin-top: 14px; }
+.cartao-tipo, .troco { margin-top: 14px; }
 .troco__valor { margin-top: 14px; }
 .campo--linha { min-height: 48px; resize: none; }
 .troco__valor .dica { margin-top: 7px; }
@@ -309,6 +323,14 @@ legend { padding: 0; margin-bottom: 4px; font: 800 1.05rem/1.2 var(--titulo); te
 
 .aviso-js { background: var(--branco); border: 3px solid var(--tinta); border-radius: var(--raio); padding: 16px; font-weight: 700; }
 
+
+@media (max-width: 699px) {
+  .folha__cab { padding-left: 16px; padding-right: 16px; }
+  .folha__corpo { padding-left: 16px; padding-right: 16px; }
+  .folha__rodape { padding-left: 16px; padding-right: 16px; }
+  #dlg-pedido .folha__rodape .btn { min-height: 54px; }
+}
+
 /* ---------- tablet ---------- */
 @media (min-width: 700px) {
   :root { --topo-h: 72px; }
@@ -322,7 +344,7 @@ legend { padding: 0; margin-bottom: 4px; font: 800 1.05rem/1.2 var(--titulo); te
   .aviso { bottom: calc(96px + env(safe-area-inset-bottom)); }
 
   dialog.folha { width: min(580px, 94vw); max-height: 90dvh; margin: auto; border-radius: 22px; border: 3px solid var(--tinta); }
-  dialog.folha--lateral { width: min(480px, 100vw); height: 100dvh; max-height: none; margin: 0 0 0 auto; border-radius: 22px 0 0 22px; border-right: 0; }
+  dialog.folha--lateral { width: min(480px, 100vw); height: 100vh; height: 100dvh; max-height: none; margin: 0 0 0 auto; border-radius: 22px 0 0 22px; border-right: 0; }
 }
 @media (min-width: 860px) {
   .menu { display: flex; }

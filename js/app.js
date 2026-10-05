@@ -454,14 +454,60 @@
     obs.addEventListener("input", () => { cart.definirObsPedido(obs.value); atualizarLink(); });
     corpo.append(h("div", { class: "pedido-obs" }, h("label", { class: "campo-rotulo", for: "obs-pedido", text: "Observação do pedido (opcional)" }), obs));
 
+    /* Como o cliente vai receber o pedido. */
+    const recebimentoBox = h("fieldset", { class: "recebimento" },
+      h("legend", { text: "Como você quer receber o pedido?" }),
+      h("p", { class: "dica", text: "Escolha uma opção para continuar." }));
+    const opcoesRecebimento = h("div", { class: "escolhas recebimento__opcoes" });
+    [
+      ["delivery", "Delivery", "Entregar no endereço informado"],
+      ["retirada", "Retirar no local", "Você busca o pedido na barraca"],
+      ["local", "Comer no local", "Pedido para consumir na barraca"],
+    ].forEach(([valor, rotulo, detalhe]) => {
+      const input = h("input", { type: "radio", name: "tipo-entrega", value: valor, checked: cart.tipoEntrega === valor });
+      input.addEventListener("change", () => {
+        cart.definirTipoEntrega(valor);
+        atualizarRecebimentoUi();
+        atualizarPagamentoUi();
+        atualizarLink();
+      });
+      opcoesRecebimento.append(h("label", { class: "escolha escolha--recebimento" }, input,
+        h("span", { class: "escolha__txt" }, rotulo, h("small", { text: detalhe }))));
+    });
+    recebimentoBox.append(opcoesRecebimento);
+    corpo.append(recebimentoBox);
+
+    /* Endereço só aparece e é obrigatório quando a opção é Delivery. */
+    const endereco = h("textarea", {
+      class: "campo campo--endereco", id: "endereco-entrega", maxlength: String(cfg.limiteEndereco), rows: "3",
+      placeholder: "Rua, número, bairro e ponto de referência", autocomplete: "street-address", enterkeyhint: "done",
+      "aria-describedby": "endereco-ajuda",
+    });
+    endereco.value = cart.enderecoEntrega;
+    endereco.addEventListener("input", () => { cart.definirEnderecoEntrega(endereco.value); atualizarLink(); });
+    const enderecoBox = h("div", { class: "entrega", id: "endereco-box" },
+      h("label", { class: "campo-rotulo", for: "endereco-entrega", text: "Endereço para entrega" }),
+      endereco,
+      h("p", { class: "dica", id: "endereco-ajuda", text: "Informe rua, número, bairro e, se precisar, um ponto de referência." }));
+    corpo.append(enderecoBox);
+
+    function atualizarRecebimentoUi() {
+      enderecoBox.hidden = cart.tipoEntrega !== "delivery";
+      endereco.toggleAttribute("required", cart.tipoEntrega === "delivery");
+      opcoesRecebimento.querySelectorAll("input").forEach((input) => {
+        input.checked = cart.tipoEntrega === input.value;
+      });
+    }
+    atualizarRecebimentoUi();
+
     /* Forma de pagamento: faz parte apenas da mensagem enviada ao WhatsApp. */
     const pagamentoBox = h("fieldset", { class: "pagamento" },
       h("legend", { text: "Forma de pagamento" }),
       h("p", { class: "dica", text: "Escolha como pretende pagar o pedido." }));
     const opcoesPagamento = h("div", { class: "escolhas pagamento__opcoes" });
     [
-      ["pix", "Pix", "Pagamento na entrega"],
-      ["cartao", "Cartão", "Maquininha na entrega"],
+      ["pix", "Pix", ""],
+      ["cartao", "Cartão", ""],
       ["dinheiro", "Dinheiro", ""],
     ].forEach(([valor, rotulo, detalhe]) => {
       const input = h("input", { type: "radio", name: "pagamento", value: valor, checked: cart.pagamento === valor });
@@ -474,6 +520,21 @@
         h("span", { class: "escolha__txt" }, rotulo, detalhe ? h("small", { text: detalhe }) : null)));
     });
     pagamentoBox.append(opcoesPagamento);
+
+    const cartaoBox = h("div", { class: "cartao-tipo", id: "cartao-tipo-box" });
+    cartaoBox.append(h("p", { class: "campo-rotulo pagamento__subtitulo", text: "Crédito ou débito?" }));
+    const cartaoEscolhas = h("div", { class: "escolhas escolhas--duas" });
+    [["credito", "Crédito"], ["debito", "Débito"]].forEach(([valor, rotulo]) => {
+      const input = h("input", { type: "radio", name: "tipo-cartao", value: valor, checked: cart.tipoCartao === valor });
+      input.addEventListener("change", () => {
+        cart.definirTipoCartao(valor);
+        atualizarPagamentoUi();
+        atualizarLink();
+      });
+      cartaoEscolhas.append(h("label", { class: "escolha" }, input, h("span", { class: "escolha__txt", text: rotulo })));
+    });
+    cartaoBox.append(cartaoEscolhas);
+    pagamentoBox.append(cartaoBox);
 
     const trocoBox = h("div", { class: "troco", id: "troco-box" });
     trocoBox.append(h("p", { class: "campo-rotulo pagamento__subtitulo", text: "Precisa de troco?" }));
@@ -510,6 +571,22 @@
     corpo.append(pagamentoBox);
 
     function atualizarPagamentoUi() {
+      const detalhes = opcoesPagamento.querySelectorAll("small");
+      detalhes.forEach((el) => el.remove());
+      opcoesPagamento.querySelectorAll("label").forEach((label) => {
+        const input = label.querySelector("input");
+        const txt = label.querySelector(".escolha__txt");
+        if (!input || !txt) return;
+        let detalhe = "";
+        if (input.value === "pix") detalhe = cart.tipoEntrega === "delivery" ? "Pagamento na entrega" : "Pagamento no local";
+        if (input.value === "cartao") detalhe = cart.tipoEntrega === "delivery" ? "Maquininha na entrega" : "Maquininha no local";
+        if (detalhe) txt.append(h("small", { text: detalhe }));
+      });
+
+      cartaoBox.hidden = cart.pagamento !== "cartao";
+      cartaoEscolhas.querySelectorAll("input").forEach((input) => {
+        input.checked = cart.tipoCartao === input.value;
+      });
       trocoBox.hidden = cart.pagamento !== "dinheiro";
       trocoValorBox.hidden = cart.pagamento !== "dinheiro" || cart.precisaTroco !== true;
       trocoEscolhas.querySelectorAll("input").forEach((input) => {
@@ -557,7 +634,10 @@
     const r = cart.linkWhatsApp();
     const msgs = {
       numero: "O número de WhatsApp do site não está configurado corretamente.",
+      entrega: "Escolha se o pedido é para delivery, retirada ou consumo no local.",
+      endereco: "Informe o endereço para entrega antes de enviar o pedido.",
       pagamento: "Escolha uma forma de pagamento antes de enviar o pedido.",
+      "tipo-cartao": "Escolha se o cartão é crédito ou débito.",
       "troco-opcao": "Informe se precisa de troco.",
       "troco-valor": "Informe um valor para troco igual ou maior que o total do pedido.",
       grande: "O pedido ficou grande demais para enviar de uma vez. Remova alguns itens ou envie em dois pedidos.",
