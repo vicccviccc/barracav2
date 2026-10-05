@@ -1,9 +1,0 @@
-# Cabeçalhos de segurança — valem em Netlify e Cloudflare Pages (lidos automaticamente).
-# Em outra hospedagem, peça ao suporte para aplicar os mesmos cabeçalhos.
-# O site não usa scripts, estilos ou fontes de outros endereços, então a política é bem fechada.
-/*
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; base-uri 'self'; form-action 'none'; object-src 'none'; frame-ancestors 'none'
-  X-Content-Type-Options: nosniff
-  X-Frame-Options: DENY
-  Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
