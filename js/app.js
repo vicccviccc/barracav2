@@ -99,11 +99,23 @@
         on: { click: () => { limparAviso(); o.acao.fn(); } },
       }));
     }
-    // dentro de uma janela aberta, o aviso precisa ficar dentro dela para ser visto
-    const alvo = $("dialog[open]") || document.body;
+    // Se houver uma janela aberta, mostra o aviso dentro da área rolável
+    // dela, logo abaixo do cabeçalho. Isso evita cobrir o botão de fechar
+    // e impede o toast de ficar enorme em tablet/desktop.
+    const janela = $("dialog[open]");
+    const alvo = janela
+      ? ($(".folha__corpo", janela) || janela)
+      : document.body;
+
     const el = $("#aviso");
-    if (el.parentNode !== alvo) alvo.append(el);
-    el.classList.toggle("aviso--topo", alvo !== document.body);
+
+    if (el.parentNode !== alvo) {
+      if (janela && alvo !== janela) alvo.prepend(el);
+      else alvo.append(el);
+    }
+
+    el.classList.toggle("aviso--dentro", !!janela);
+    el.classList.remove("aviso--topo");
     el.replaceChildren(caixa);
 
     const sr = $("#aviso-sr");

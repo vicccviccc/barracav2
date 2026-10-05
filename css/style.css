@@ -372,3 +372,70 @@ legend { padding: 0; margin-bottom: 4px; font: 800 1.05rem/1.2 var(--titulo); te
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+
+/* ==========================================================
+   AVISO / DESFAZER — correção tablet, desktop e celular
+   ========================================================== */
+
+/* Quando o aviso está dentro de um dialog, ele deixa de ser
+   um popup fixo sobre a tela e vira um toast compacto dentro
+   da área rolável, abaixo do cabeçalho. */
+.aviso.aviso--dentro {
+  position: sticky;
+  z-index: 30;
+  top: 0;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  margin: 0 0 14px;
+  padding: 2px 0 4px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  pointer-events: none;
+}
+
+.aviso.aviso--dentro .aviso__caixa {
+  width: fit-content;
+  max-width: min(420px, 100%);
+  height: auto;
+  min-height: 0;
+  flex: 0 1 auto;
+  padding: 10px 12px;
+  gap: 10px;
+  border-width: 2px;
+  border-radius: 12px;
+  box-shadow: 3px 3px 0 var(--tinta);
+  font-size: 0.92rem;
+  line-height: 1.25;
+}
+
+.aviso.aviso--dentro .aviso__acao {
+  min-height: 36px;
+  padding: 0 12px;
+  border-width: 2px;
+  font-size: 0.84rem;
+}
+
+@media (max-width: 699px) {
+  .aviso.aviso--dentro {
+    margin-bottom: 10px;
+  }
+
+  .aviso.aviso--dentro .aviso__caixa {
+    max-width: 100%;
+    padding: 9px 10px;
+    gap: 8px;
+    font-size: 0.88rem;
+  }
+
+  .aviso.aviso--dentro .aviso__acao {
+    min-height: 34px;
+    padding: 0 10px;
+    font-size: 0.8rem;
+  }
+}
