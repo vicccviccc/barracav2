@@ -220,9 +220,9 @@ a { color: inherit; }
 
 /* ---------- aviso (toast) ---------- */
 .aviso { position: fixed; z-index: 400; left: 12px; right: 12px; bottom: calc(92px + env(safe-area-inset-bottom)); display: flex; justify-content: center; pointer-events: none; }
-.aviso__caixa { pointer-events: auto; display: flex; align-items: center; gap: 14px; max-width: 460px; padding: 12px 14px 12px 18px; background: var(--branco); color: var(--tinta); border: 3px solid var(--tinta); border-radius: 14px; box-shadow: 5px 5px 0 var(--tinta); font-weight: 700; animation: entra 0.2s ease-out; }
+.aviso__caixa { pointer-events: none; display: flex; align-items: center; gap: 14px; max-width: 460px; padding: 12px 14px 12px 18px; background: var(--branco); color: var(--tinta); border: 3px solid var(--tinta); border-radius: 14px; box-shadow: 5px 5px 0 var(--tinta); font-weight: 700; animation: entra 0.2s ease-out; }
 .aviso--topo { bottom: auto; top: 16px; }
-.aviso__acao { flex: none; min-height: 40px; padding: 0 14px; background: var(--amarelo); color: var(--tinta); border: 2px solid var(--tinta); border-radius: 999px; font: 800 0.9rem/1 var(--corpo); cursor: pointer; }
+.aviso__acao { pointer-events: auto; flex: none; min-height: 40px; padding: 0 14px; background: var(--amarelo); color: var(--tinta); border: 2px solid var(--tinta); border-radius: 999px; font: 800 0.9rem/1 var(--corpo); cursor: pointer; }
 @keyframes entra { from { transform: translateY(12px); opacity: 0; } }
 
 /* ---------- janelas (produto e pedido) ---------- */
