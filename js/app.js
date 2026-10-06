@@ -193,7 +193,7 @@
       info.append(h("span", { class: "linha__opcoes", text: p.opcoes.map((o) => o.nome + " " + moeda(o.preco)).join(" · ") }));
     }
     const botao = h("button", { class: "btn-mais", type: "button", "aria-label": "Adicionar " + p.nome + " ao pedido" }, icone("i-plus"));
-    botao.addEventListener("click", () => (p.opcoes ? abrirProduto(p.id) : adicionarDireto(p)));
+    botao.addEventListener("click", () => (p.opcoes ? abrirProduto(p.id) : adicionarDireto(p, botao)));
     return h("li", { class: "linha" }, info,
       p.opcoes ? null : h("span", { class: "linha__pontos", "aria-hidden": "true" }),
       p.opcoes ? null : h("span", { class: "preco", text: moeda(p.preco) }),
@@ -233,10 +233,10 @@
     $$(".categoria").forEach((c) => io.observe(c));
   }
 
-  function adicionarDireto(p) {
+  function adicionarDireto(p, origem) {
     const r = cart.adicionar({ produtoId: p.id, qtd: 1 });
     if (!r.ok) return avisar("O pedido chegou ao limite de itens. Envie este e faça outro em seguida.");
-    pulsar();
+    animarAdicao(origem);
     avisar(p.nome + " adicionado ao pedido");
   }
 
@@ -379,9 +379,22 @@
       };
       const r = base ? cart.substituir(base.id, dados) : cart.adicionar(dados);
       if (!r.ok) return avisar("Não foi possível adicionar. O pedido pode ter chegado ao limite de itens.");
+      if (base) {
+        fechar(dlgProduto);
+        return avisar("Item atualizado");
+      }
+      // Guarda o ponto exato do toque antes de fechar a janela.
+      // Depois que o dialog fecha, o alvo é medido de novo e a mesma animação
+      // usada nas bebidas parte desse ponto até "Meu pedido".
+      const rOrigem = ok.getBoundingClientRect();
+      const pontoOrigem = {
+        x: rOrigem.left + rOrigem.width / 2,
+        y: rOrigem.top + rOrigem.height / 2,
+      };
       fechar(dlgProduto);
-      if (base) return avisar("Item atualizado");
-      pulsar();
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => animarAdicao(pontoOrigem));
+      });
       avisar(p.nome + " adicionado ao pedido");
     });
 
@@ -680,23 +693,112 @@
     }
   }
 
-  /* ---------- resumo (topo + barra fixa) ---------- */
+  /* ---------- resumo + animação até "Meu pedido" ---------- */
+  let timerChamadaPedido;
+  let timerChegadaPedido;
+  let animacaoPedidoEmCurso = false;
+
   function pulsar() {
-    $$("[data-contador]").forEach((c) => {
-      c.classList.remove("pulo");
+    $$('[data-contador]').forEach((c) => {
+      c.classList.remove('pulo');
       void c.offsetWidth;
-      c.classList.add("pulo");
+      c.classList.add('pulo');
+    });
+  }
+
+  function destacarPedido() {
+    const botao = $('.btn-pedido');
+    if (!botao) return;
+
+    clearTimeout(timerChamadaPedido);
+    clearTimeout(timerChegadaPedido);
+
+    botao.classList.remove('btn-pedido--chegou');
+    void botao.offsetWidth;
+    botao.classList.add('btn-pedido--chegou', 'btn-pedido--chamada');
+    pulsar();
+
+    timerChegadaPedido = setTimeout(() => {
+      botao.classList.remove('btn-pedido--chegou');
+    }, 620);
+
+    // No celular o botão se abre por um instante para ensinar onde o pedido fica.
+    timerChamadaPedido = setTimeout(() => {
+      botao.classList.remove('btn-pedido--chamada');
+    }, 1900);
+  }
+
+  function animarAdicao(origem) {
+    const alvo = $('.btn-pedido');
+    if (!alvo) return pulsar();
+
+    const reduzir = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduzir || typeof alvo.animate !== 'function') {
+      destacarPedido();
+      return;
+    }
+
+    const origemRect = origem && typeof origem.getBoundingClientRect === 'function'
+      ? origem.getBoundingClientRect()
+      : null;
+
+    const inicioX = origemRect
+      ? origemRect.left + origemRect.width / 2
+      : (origem && Number.isFinite(origem.x) ? origem.x : innerWidth / 2);
+    const inicioY = origemRect
+      ? origemRect.top + origemRect.height / 2
+      : (origem && Number.isFinite(origem.y) ? origem.y : innerHeight * 0.72);
+
+    // O destino só é medido quando a animação realmente vai começar.
+    // Isso evita erro depois que o popup do hambúrguer fecha e o viewport volta ao normal.
+    const alvoRect = alvo.getBoundingClientRect();
+    const fimX = alvoRect.left + alvoRect.width / 2;
+    const fimY = alvoRect.top + alvoRect.height / 2;
+
+    $('.pedido-voador')?.remove();
+    animacaoPedidoEmCurso = true;
+
+    const voador = h('div', { class: 'pedido-voador', 'aria-hidden': 'true' }, icone('i-bag'));
+    voador.style.left = '0px';
+    voador.style.top = '0px';
+    document.body.append(voador);
+
+    const arco = Math.max(38, Math.min(105, Math.abs(fimY - inicioY) * 0.18));
+    const p1x = inicioX + (fimX - inicioX) * 0.22;
+    const p1y = inicioY + (fimY - inicioY) * 0.18 - arco * 0.45;
+    const p2x = inicioX + (fimX - inicioX) * 0.56;
+    const p2y = inicioY + (fimY - inicioY) * 0.50 - arco;
+    const p3x = inicioX + (fimX - inicioX) * 0.86;
+    const p3y = inicioY + (fimY - inicioY) * 0.84 - arco * 0.25;
+
+    const pos = (x, y, escala, rotacao) =>
+      `translate3d(${x - 25}px, ${y - 25}px, 0) scale(${escala}) rotate(${rotacao}deg)`;
+
+    const anim = voador.animate([
+      { transform: pos(inicioX, inicioY, .55, -12), opacity: 0 },
+      { offset: .10, transform: pos(inicioX, inicioY, 1.06, -7), opacity: 1 },
+      { offset: .30, transform: pos(p1x, p1y, 1.02, -2), opacity: 1 },
+      { offset: .58, transform: pos(p2x, p2y, .94, 7), opacity: 1 },
+      { offset: .84, transform: pos(p3x, p3y, .72, 3), opacity: 1 },
+      { transform: pos(fimX, fimY, .30, 0), opacity: .16 }
+    ], {
+      duration: 2000,
+      easing: 'cubic-bezier(.22,.61,.36,1)',
+      fill: 'forwards'
+    });
+
+    anim.finished.catch(() => {}).finally(() => {
+      voador.remove();
+      animacaoPedidoEmCurso = false;
+      destacarPedido();
     });
   }
 
   function atualizarResumo() {
     const n = cart.quantidade();
-    $$("[data-contador]").forEach((c) => { c.textContent = String(n); c.hidden = n === 0; });
-    $(".btn-pedido").setAttribute("aria-label", n ? "Meu pedido, " + rotuloItens(n) : "Meu pedido, vazio");
-    $("#barra-pedido").hidden = n === 0;
-    document.body.classList.toggle("com-barra", n > 0);
-    $("#barra-itens").textContent = rotuloItens(n);
-    $("#barra-total").textContent = moeda(cart.total());
+    $$('[data-contador]').forEach((c) => { c.textContent = String(n); c.hidden = n === 0; });
+    const botao = $('.btn-pedido');
+    if (botao) botao.setAttribute('aria-label', n ? 'Meu pedido, ' + rotuloItens(n) : 'Meu pedido, vazio');
     if (dlgPedido.open) renderPedido();
   }
 
@@ -706,30 +808,8 @@
     preencherIngredientesComuns();
     renderCardapio();
 
-    const barraBotao = $("#barra-pedido .barra__btn");
+    $$('[data-abrir-pedido]').forEach((b) => b.addEventListener('click', abrirPedido));
 
-    $$("[data-abrir-pedido]").forEach((b) => {
-      if (b !== barraBotao) b.addEventListener("click", abrirPedido);
-    });
-
-    if (barraBotao) {
-      let toqueRecente = 0;
-
-      barraBotao.addEventListener("pointerup", (e) => {
-        if (e.pointerType !== "touch" && e.pointerType !== "pen") return;
-        toqueRecente = performance.now();
-        e.preventDefault();
-        abrirPedido();
-      });
-
-      barraBotao.addEventListener("click", (e) => {
-        if (performance.now() - toqueRecente < 700) {
-          e.preventDefault();
-          return;
-        }
-        abrirPedido();
-      });
-    }
     document.addEventListener("click", (e) => {
       const b = e.target.closest("[data-fechar]");
       if (b) fechar(b.closest("dialog"));

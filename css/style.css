@@ -39,7 +39,6 @@ body {
   color: var(--tinta);
   background: var(--branco);
 }
-body.com-barra { padding-bottom: 88px; }
 img { display: block; max-width: 100%; height: auto; }
 h1, h2, h3, h4 { font-family: var(--titulo); line-height: 1.15; margin: 0; }
 p { margin: 0 0 1em; }
@@ -56,7 +55,7 @@ a { color: inherit; }
 
 /* foco visível: anel branco + anel escuro, aparece em qualquer fundo */
 :focus-visible { outline: 3px solid var(--tinta); outline-offset: 3px; box-shadow: 0 0 0 3px var(--branco); border-radius: 6px; }
-.btn:focus-visible, .btn-pedido:focus-visible, .barra__btn:focus-visible { border-radius: 999px; }
+.btn:focus-visible, .btn-pedido:focus-visible { border-radius: 999px; }
 
 .pular { position: absolute; left: 12px; top: -80px; z-index: 200; background: var(--tinta); color: var(--amarelo); padding: 12px 18px; border-radius: 10px; font-weight: 700; }
 .pular:focus { top: 12px; }
@@ -87,18 +86,36 @@ a { color: inherit; }
 /* ---------- topo ---------- */
 .topo { position: sticky; top: 0; z-index: 50; height: var(--topo-h); background: var(--amarelo); border-bottom: 3px solid var(--tinta); }
 .topo__in { height: 100%; max-width: 1120px; margin-inline: auto; padding-inline: 20px; display: flex; align-items: center; gap: 16px; }
-.marca { display: flex; align-items: center; gap: 10px; text-decoration: none; margin-right: auto; min-width: 0; }
+.marca { display: flex; align-items: center; gap: 10px; text-decoration: none; margin-right: auto; min-width: 0; overflow: hidden; }
 .marca img { border-radius: 12px; border: 2px solid var(--tinta); }
-.marca__nome { font: 700 0.95rem/1 var(--titulo); text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
+.marca__nome { min-width: 0; overflow: hidden; text-overflow: ellipsis; font: 700 0.95rem/1 var(--titulo); text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
 .menu { display: none; gap: 4px; }
 .menu a { padding: 10px 14px; font-weight: 700; text-decoration: none; border-radius: 999px; }
 .menu a:hover { background: rgba(43, 29, 4, 0.12); }
 
 .btn-pedido {
-  display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 16px;
+  position: relative; display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 16px;
   background: var(--tinta); color: var(--amarelo); border: 0; border-radius: 999px; font: 700 0.95rem/1 var(--corpo); cursor: pointer;
+  overflow: hidden; isolation: isolate; white-space: nowrap; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+  transition: transform .24s cubic-bezier(.2,.8,.2,1), box-shadow .24s ease, padding .32s cubic-bezier(.2,.8,.2,1);
 }
-.btn-pedido__txt { display: none; }
+.btn-pedido > * { position: relative; z-index: 1; }
+.btn-pedido__txt { display: inline-block; max-width: 0; opacity: 0; overflow: hidden; transform: translateX(8px); transition: max-width .42s cubic-bezier(.2,.8,.2,1), opacity .22s ease, transform .32s ease; }
+.btn-pedido--chamada .btn-pedido__txt { max-width: 110px; opacity: 1; transform: translateX(0); }
+.btn-pedido--chegou { animation: pedido-chegou .58s cubic-bezier(.2,.9,.25,1); }
+@keyframes pedido-chegou {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(43,29,4,0); }
+  36% { transform: scale(1.10); box-shadow: 0 0 0 7px rgba(255,255,255,.36); }
+  68% { transform: scale(.97); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(43,29,4,0); }
+}
+
+.pedido-voador {
+  position: fixed; z-index: 1800; width: 50px; height: 50px; display: grid; place-items: center;
+  background: var(--tinta); color: var(--amarelo); border: 3px solid var(--amarelo); border-radius: 50%;
+  box-shadow: 0 10px 26px rgba(0,0,0,.28); pointer-events: none; will-change: transform, opacity;
+}
+.pedido-voador .icon { width: 24px; height: 24px; }
 .contador {
   display: inline-grid; place-items: center; min-width: 26px; height: 26px; padding: 0 7px;
   background: var(--amarelo); color: var(--tinta); border-radius: 999px; font-size: 0.85rem; font-weight: 800;
@@ -204,23 +221,8 @@ a { color: inherit; }
 .rodape__fim p { margin: 0; max-width: 70ch; }
 .rodape :focus-visible { outline-color: var(--amarelo); box-shadow: 0 0 0 3px var(--tinta); }
 
-/* ---------- barra fixa do pedido ---------- */
-.barra { position: fixed; z-index: 1000; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); pointer-events: auto; touch-action: manipulation; }
-.barra__btn {
-  width: 100%; min-height: 60px; display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 14px;
-  padding: 0 8px 0 20px; background: var(--tinta); color: var(--branco); border: 3px solid var(--amarelo); border-radius: 999px;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35); font: 700 1rem/1 var(--corpo); cursor: pointer; text-align: left;
-  position: relative; z-index: 1; pointer-events: auto; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
-  -webkit-user-select: none; user-select: none;
-}
-.barra__btn * { pointer-events: none; }
-.barra__info { display: flex; align-items: center; gap: 10px; }
-.barra__total { font: 800 1.1rem/1 var(--titulo); font-variant-numeric: lining-nums; }
-.barra__acao { display: inline-grid; place-items: center; min-height: 44px; padding: 0 18px; background: var(--amarelo); color: var(--tinta); border-radius: 999px; }
-.barra:not([hidden]) { animation: none; }
-
 /* ---------- aviso (toast) ---------- */
-.aviso { position: fixed; z-index: 400; left: 12px; right: 12px; bottom: calc(92px + env(safe-area-inset-bottom)); display: flex; justify-content: center; pointer-events: none; }
+.aviso { position: fixed; z-index: 400; left: 12px; right: 12px; bottom: calc(18px + env(safe-area-inset-bottom)); display: flex; justify-content: center; pointer-events: none; }
 .aviso__caixa { pointer-events: none; display: flex; align-items: center; gap: 14px; max-width: 460px; padding: 12px 14px 12px 18px; background: var(--branco); color: var(--tinta); border: 3px solid var(--tinta); border-radius: 14px; box-shadow: 5px 5px 0 var(--tinta); font-weight: 700; animation: entra 0.2s ease-out; }
 .aviso--topo { bottom: auto; top: 16px; }
 .aviso__acao { pointer-events: auto; flex: none; min-height: 40px; padding: 0 14px; background: var(--amarelo); color: var(--tinta); border: 2px solid var(--tinta); border-radius: 999px; font: 800 0.9rem/1 var(--corpo); cursor: pointer; }
@@ -337,13 +339,11 @@ legend { padding: 0; margin-bottom: 4px; font: 800 1.05rem/1.2 var(--titulo); te
 @media (min-width: 700px) {
   :root { --topo-h: 72px; }
   .marca__nome { font-size: 1.05rem; }
-  .btn-pedido__txt { display: inline; }
+  .btn-pedido__txt { max-width: 110px; opacity: 1; transform: none; }
   .hero__logo img { width: 300px; }
   .grade { grid-template-columns: repeat(2, 1fr); }
   .rodape__grade { grid-template-columns: 1.1fr 1fr 1fr 1fr; align-items: start; }
-  .barra { left: 50%; right: auto; width: min(560px, calc(100% - 24px)); transform: translateX(-50%); }
-  .barra:not([hidden]) { animation: none; }
-  .aviso { bottom: calc(96px + env(safe-area-inset-bottom)); }
+  .aviso { bottom: calc(20px + env(safe-area-inset-bottom)); }
 
   dialog.folha { width: min(580px, 94vw); max-height: 90dvh; margin: auto; border-radius: 22px; border: 3px solid var(--tinta); }
   dialog.folha--lateral { width: min(480px, 100vw); height: 100vh; height: 100dvh; max-height: none; margin: 0 0 0 auto; border-radius: 22px 0 0 22px; border-right: 0; }
