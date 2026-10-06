@@ -19,6 +19,7 @@ window.BB = window.BB || {};
 
   let itens = [];
   let obsPedido = "";
+  let nomeCliente = "";
   let tipoEntrega = "";
   let enderecoEntrega = "";
   let pagamento = "";
@@ -112,6 +113,7 @@ window.BB = window.BB || {};
       sessionStorage.setItem(CHAVE, JSON.stringify({
         itens: itens.map((i) => ({ produtoId: i.produtoId, opcaoId: i.opcaoId, removidos: i.removidos, extras: i.extras, qtd: i.qtd, obs: i.obs })),
         obsPedido,
+        nomeCliente,
         tipoEntrega,
         enderecoEntrega,
         pagamento,
@@ -128,6 +130,7 @@ window.BB = window.BB || {};
       if (!dados || !Array.isArray(dados.itens)) return;
       itens = dados.itens.slice(0, cfg.limiteLinhas).map(normalizar).filter(Boolean).map((i) => ({ ...i, id: novoId() }));
       obsPedido = limpar(dados.obsPedido, cfg.limiteObsPedido);
+      nomeCliente = limpar(dados.nomeCliente, cfg.limiteNomeCliente);
       tipoEntrega = ["delivery", "retirada", "local"].includes(dados.tipoEntrega) ? dados.tipoEntrega : "";
       enderecoEntrega = limpar(dados.enderecoEntrega, cfg.limiteEndereco);
       pagamento = ["pix", "cartao", "dinheiro"].includes(dados.pagamento) ? dados.pagamento : "";
@@ -138,7 +141,7 @@ window.BB = window.BB || {};
       if (pagamento !== "dinheiro") { precisaTroco = null; trocoPara = 0; }
       if (precisaTroco !== true) trocoPara = 0;
     } catch (e) {
-      itens = []; obsPedido = ""; tipoEntrega = ""; enderecoEntrega = ""; pagamento = ""; tipoCartao = ""; precisaTroco = null; trocoPara = 0;
+      itens = []; obsPedido = ""; nomeCliente = ""; tipoEntrega = ""; enderecoEntrega = ""; pagamento = ""; tipoCartao = ""; precisaTroco = null; trocoPara = 0;
     }
   }
 
@@ -198,9 +201,10 @@ window.BB = window.BB || {};
   }
 
   function limparTudo() {
-    const copia = { itens: itens.slice(), obsPedido, tipoEntrega, enderecoEntrega, pagamento, tipoCartao, precisaTroco, trocoPara };
+    const copia = { itens: itens.slice(), obsPedido, nomeCliente, tipoEntrega, enderecoEntrega, pagamento, tipoCartao, precisaTroco, trocoPara };
     itens = [];
     obsPedido = "";
+    nomeCliente = "";
     tipoEntrega = "";
     enderecoEntrega = "";
     pagamento = "";
@@ -214,6 +218,7 @@ window.BB = window.BB || {};
   function restaurarTudo(copia) {
     itens = copia.itens;
     obsPedido = copia.obsPedido;
+    nomeCliente = limpar(copia.nomeCliente, cfg.limiteNomeCliente);
     tipoEntrega = ["delivery", "retirada", "local"].includes(copia.tipoEntrega) ? copia.tipoEntrega : "";
     enderecoEntrega = copia.enderecoEntrega || "";
     pagamento = copia.pagamento || "";
@@ -226,6 +231,11 @@ window.BB = window.BB || {};
   /* A observação geral é guardada sem redesenhar a tela (não tira o foco). */
   function definirObsPedido(texto) {
     obsPedido = limpar(texto, cfg.limiteObsPedido);
+    guardar();
+  }
+
+  function definirNomeCliente(texto) {
+    nomeCliente = limpar(texto, cfg.limiteNomeCliente);
     guardar();
   }
 
@@ -273,6 +283,7 @@ window.BB = window.BB || {};
   /* ---------- mensagem do WhatsApp ---------- */
   function mensagem() {
     const L = ["Olá! Gostaria de fazer um pedido:", ""];
+    if (nomeCliente) L.push("Nome: " + nomeCliente, "");
     itens.forEach((it) => {
       const p = produto(it.produtoId);
       const op = opcaoDe(p, it.opcaoId);
@@ -309,6 +320,7 @@ window.BB = window.BB || {};
   function linkWhatsApp() {
     if (!/^\d{10,15}$/.test(String(cfg.whatsapp))) return { erro: "numero" };
     if (!itens.length) return { erro: "vazio" };
+    if (!nomeCliente) return { erro: "nome" };
     if (!tipoEntrega) return { erro: "entrega" };
     if (tipoEntrega === "delivery" && !enderecoEntrega) return { erro: "endereco" };
     if (!pagamento) return { erro: "pagamento" };
@@ -325,6 +337,7 @@ window.BB = window.BB || {};
   BB.carrinho = {
     get itens() { return itens; },
     get obsPedido() { return obsPedido; },
+    get nomeCliente() { return nomeCliente; },
     get tipoEntrega() { return tipoEntrega; },
     get enderecoEntrega() { return enderecoEntrega; },
     get pagamento() { return pagamento; },
@@ -333,7 +346,7 @@ window.BB = window.BB || {};
     get trocoPara() { return trocoPara; },
     aoMudar: (fn) => ouvintes.push(fn),
     produto, opcaoDe, removiveis, precoUnitario,
-    adicionar, substituir, definirQtd, remover, restaurar, limparTudo, restaurarTudo, definirObsPedido, definirTipoEntrega, definirEnderecoEntrega,
+    adicionar, substituir, definirQtd, remover, restaurar, limparTudo, restaurarTudo, definirObsPedido, definirNomeCliente, definirTipoEntrega, definirEnderecoEntrega,
     definirPagamento, definirTipoCartao, definirPrecisaTroco, definirTrocoPara,
     subtotal, total, quantidade, mensagem, linkWhatsApp,
   };

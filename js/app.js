@@ -397,6 +397,9 @@
   let foco = null; // lembra qual botão estava em uso, para devolver o foco depois de redesenhar
 
   function abrirPedido() {
+    // Remove qualquer aviso temporário antes de abrir o painel.
+    // Isso também evita camadas antigas interferindo no toque em navegadores móveis.
+    limparAviso();
     renderPedido();
     abrir(dlgPedido);
   }
@@ -460,6 +463,16 @@
     rodape.hidden = false;
 
     corpo.append(h("ul", null, cart.itens.map(itemPedido)));
+
+    const nomeCliente = h("input", {
+      class: "campo campo--linha", id: "nome-cliente", type: "text", maxlength: String(cfg.limiteNomeCliente),
+      placeholder: "Seu nome", autocomplete: "name", enterkeyhint: "next", required: true,
+    });
+    nomeCliente.value = cart.nomeCliente;
+    nomeCliente.addEventListener("input", () => { cart.definirNomeCliente(nomeCliente.value); atualizarLink(); });
+    corpo.append(h("div", { class: "pedido-cliente" },
+      h("label", { class: "campo-rotulo", for: "nome-cliente", text: "Nome" }),
+      nomeCliente));
 
     const obs = h("textarea", { class: "campo", id: "obs-pedido", maxlength: String(cfg.limiteObsPedido), rows: "2", placeholder: "Ex.: tudo separado" });
     obs.value = cart.obsPedido;
@@ -646,6 +659,7 @@
     const r = cart.linkWhatsApp();
     const msgs = {
       numero: "O número de WhatsApp do site não está configurado corretamente.",
+      nome: "Informe seu nome antes de enviar o pedido.",
       entrega: "Escolha se o pedido é para delivery, retirada ou consumo no local.",
       endereco: "Informe o endereço para entrega antes de enviar o pedido.",
       pagamento: "Escolha uma forma de pagamento antes de enviar o pedido.",
@@ -692,7 +706,30 @@
     preencherIngredientesComuns();
     renderCardapio();
 
-    $$("[data-abrir-pedido]").forEach((b) => b.addEventListener("click", abrirPedido));
+    const barraBotao = $("#barra-pedido .barra__btn");
+
+    $$("[data-abrir-pedido]").forEach((b) => {
+      if (b !== barraBotao) b.addEventListener("click", abrirPedido);
+    });
+
+    if (barraBotao) {
+      let toqueRecente = 0;
+
+      barraBotao.addEventListener("pointerup", (e) => {
+        if (e.pointerType !== "touch" && e.pointerType !== "pen") return;
+        toqueRecente = performance.now();
+        e.preventDefault();
+        abrirPedido();
+      });
+
+      barraBotao.addEventListener("click", (e) => {
+        if (performance.now() - toqueRecente < 700) {
+          e.preventDefault();
+          return;
+        }
+        abrirPedido();
+      });
+    }
     document.addEventListener("click", (e) => {
       const b = e.target.closest("[data-fechar]");
       if (b) fechar(b.closest("dialog"));
