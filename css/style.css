@@ -209,14 +209,13 @@ a { color: inherit; }
 
 /* ---------- rodapé ---------- */
 .rodape { background: var(--tinta); color: #f4ead0; padding: 40px 0 28px; border-top: 10px solid var(--amarelo); }
-.rodape__grade { display: grid; gap: 28px; }
+.rodape__grade { display: grid; gap: 28px; align-items: start; }
 .rodape__marca img { width: 150px; }
 .rodape__tit { font: 800 0.8rem/1 var(--corpo); letter-spacing: 0.14em; text-transform: uppercase; color: var(--amarelo); margin-bottom: 12px; }
 .rodape p { margin-bottom: 8px; }
 .rodape a { text-underline-offset: 3px; }
 .rodape a:hover { color: var(--amarelo); }
 .rodape__links li { margin-bottom: 8px; }
-.horarios--claro li { border-bottom-color: rgba(255, 255, 255, 0.22); max-width: 320px; }
 .rodape__fim { margin-top: 28px; padding-top: 18px; border-top: 1px solid rgba(255, 255, 255, 0.18); font-size: 0.88rem; color: #cfc4a6; }
 .rodape__fim p { margin: 0; max-width: 70ch; }
 .rodape :focus-visible { outline-color: var(--amarelo); box-shadow: 0 0 0 3px var(--tinta); }
@@ -360,7 +359,7 @@ legend { padding: 0; margin-bottom: 4px; font: 800 1.05rem/1.2 var(--titulo); te
   .btn-pedido__txt { max-width: 110px; opacity: 1; transform: none; }
   .hero__logo img { width: 300px; }
   .grade { grid-template-columns: repeat(2, 1fr); }
-  .rodape__grade { grid-template-columns: 1.1fr 1fr 1fr 1fr; align-items: start; }
+  .rodape__grade { grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr); max-width: 720px; margin-inline: auto; }
   .aviso { bottom: calc(20px + env(safe-area-inset-bottom)); }
 
   dialog.folha { width: min(580px, 94vw); max-height: 90dvh; margin: auto; border-radius: 22px; border: 3px solid var(--tinta); }

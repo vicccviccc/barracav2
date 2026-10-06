@@ -184,13 +184,13 @@
     });
 
     $("#telefone").textContent = cfg.whatsappExibicao;
-    $("#rodape-telefone").textContent = "WhatsApp: " + cfg.whatsappExibicao;
 
     const faixa = $("#faixa-horario");
     cfg.horarios.forEach((hr) => faixa.append(h("span", { text: hr.rotulo + ": " + hr.valor })));
-    ["#lista-horarios", "#rodape-horarios"].forEach((sel) => {
-      const ul = $(sel);
-      cfg.horarios.forEach((hr) => ul.append(h("li", null, h("span", { text: hr.rotulo }), h("span", { text: hr.valor }))));
+
+    const listaHorarios = $("#lista-horarios");
+    cfg.horarios.forEach((hr) => {
+      listaHorarios.append(h("li", null, h("span", { text: hr.rotulo }), h("span", { text: hr.valor })));
     });
   }
 
