@@ -73,19 +73,55 @@
   const rotuloItens = (n) => n + (n === 1 ? " item" : " itens");
 
   /* ---------- janelas (dialog) ---------- */
+  function pedidoNaoModalNoMobile(d) {
+    return d && d.id === "dlg-pedido" && window.matchMedia && window.matchMedia("(max-width: 699px)").matches;
+  }
+
   function abrir(d) {
-    if (d.open) return;
-    if (typeof d.showModal === "function") d.showModal(); else d.setAttribute("open", "");
+    if (!d || d.open) return;
+
+    // No mobile, o painel do pedido funciona como uma camada fixa normal.
+    // Isso evita o estado "inerte" do showModal() ficar preso em alguns navegadores.
+    if (pedidoNaoModalNoMobile(d)) {
+      d.dataset.modoAbertura = "nao-modal";
+      d.setAttribute("open", "");
+    } else if (typeof d.showModal === "function") {
+      d.dataset.modoAbertura = "modal";
+      d.showModal();
+    } else {
+      d.dataset.modoAbertura = "nao-modal";
+      d.setAttribute("open", "");
+    }
+
     document.documentElement.classList.add("travado");
   }
+
   function fechar(d) {
-    if (typeof d.close === "function") d.close(); else d.removeAttribute("open");
+    if (!d) return;
+
+    try {
+      if (d.open && d.dataset.modoAbertura === "modal" && typeof d.close === "function") d.close();
+      else d.removeAttribute("open");
+    } catch (e) {
+      d.removeAttribute("open");
+    }
+
+    d.removeAttribute("data-modo-abertura");
     aoFechar();
   }
+
   function aoFechar() {
     const aviso = $("#aviso");
-    if (aviso && aviso.parentNode !== document.body) document.body.append(aviso);
-    if (!$("dialog[open]")) document.documentElement.classList.remove("travado");
+    if (aviso) {
+      if (aviso.parentNode !== document.body) document.body.append(aviso);
+      aviso.classList.remove("aviso--dentro", "aviso--topo");
+    }
+
+    // Espera o navegador terminar de remover o dialog da camada ativa antes
+    // de liberar a página. Ajuda especialmente no Safari/iOS.
+    requestAnimationFrame(() => {
+      if (!$("dialog[open]")) document.documentElement.classList.remove("travado");
+    });
   }
 
   /* ---------- aviso (toast) ---------- */
@@ -104,14 +140,14 @@
     // e impede o toast de ficar enorme em tablet/desktop.
     const janela = $("dialog[open]");
     const alvo = janela
-      ? ($(".folha__corpo", janela) || janela)
+      ? (janela.id === "dlg-pedido" ? $("#pedido-aviso") : ($(".folha__corpo", janela) || janela))
       : document.body;
 
     const el = $("#aviso");
+    if (!el || !alvo) return;
 
     if (el.parentNode !== alvo) {
-      if (janela && alvo !== janela) alvo.prepend(el);
-      else alvo.append(el);
+      alvo.append(el);
     }
 
     el.classList.toggle("aviso--dentro", !!janela);
@@ -125,7 +161,10 @@
     clearTimeout(timerAviso);
     timerAviso = setTimeout(limparAviso, o.acao ? 6500 : 3200);
   }
-  function limparAviso() { $("#aviso").replaceChildren(); }
+  function limparAviso() {
+    const el = $("#aviso");
+    if (el) el.replaceChildren();
+  }
 
   /* ---------- dados de contato (vêm de config.js) ---------- */
   function preencherContato() {
@@ -408,6 +447,7 @@
   /* ---------- painel do pedido ---------- */
   const dlgPedido = $("#dlg-pedido");
   let foco = null; // lembra qual botão estava em uso, para devolver o foco depois de redesenhar
+  let renderPedidoRaf = 0;
 
   function abrirPedido() {
     // Remove qualquer aviso temporário antes de abrir o painel.
@@ -445,7 +485,9 @@
     const remover = h("button", { class: "link-btn", type: "button", "data-acao": "remover", "aria-label": "Remover " + nome }, icone("i-trash"), "Remover");
     remover.addEventListener("click", () => acaoItem(it.id, "remover", () => {
       const r = cart.remover(it.id);
-      if (r) avisar(nome + " removido", { acao: { rotulo: "Desfazer", fn: () => cart.restaurar(r.item, r.pos) } });
+      if (r) requestAnimationFrame(() => {
+        avisar(nome + " removido", { acao: { rotulo: "Desfazer", fn: () => cart.restaurar(r.item, r.pos) } });
+      });
     }));
 
     return h("li", { class: "item", "data-item": it.id },
@@ -463,6 +505,7 @@
     rodape.replaceChildren();
 
     if (!cart.itens.length) {
+      foco = null;
       rodape.hidden = true;
       corpo.append(h("div", { class: "vazio" },
         icone("i-bag"),
@@ -644,7 +687,9 @@
     const limpar = h("button", { class: "link-btn", type: "button", text: "Limpar pedido" });
     limpar.addEventListener("click", () => {
       const copia = cart.limparTudo();
-      avisar("Pedido limpo", { acao: { rotulo: "Desfazer", fn: () => cart.restaurarTudo(copia) } });
+      requestAnimationFrame(() => {
+        avisar("Pedido limpo", { acao: { rotulo: "Desfazer", fn: () => cart.restaurarTudo(copia) } });
+      });
     });
     corpo.append(h("div", { class: "pedido-limpar" }, limpar));
 
@@ -656,10 +701,13 @@
       enviar);
     atualizarLink();
 
-    // devolve o foco ao botão que o cliente estava usando
+    // devolve o foco apenas se o mesmo controle ainda existe.
+    // Ao remover um item, não força o foco para o X do painel no mobile.
     if (foco) {
       const alvo = corpo.querySelector('[data-item="' + foco.id + '"] [data-acao="' + foco.acao + '"]:not([disabled])');
-      (alvo || $("[data-fechar]", dlgPedido)).focus();
+      if (alvo) {
+        try { alvo.focus({ preventScroll: true }); } catch (e) { alvo.focus(); }
+      }
       foco = null;
     }
   }
@@ -799,7 +847,16 @@
     $$('[data-contador]').forEach((c) => { c.textContent = String(n); c.hidden = n === 0; });
     const botao = $('.btn-pedido');
     if (botao) botao.setAttribute('aria-label', n ? 'Meu pedido, ' + rotuloItens(n) : 'Meu pedido, vazio');
-    if (dlgPedido.open) renderPedido();
+
+    // Não destrói/recria o botão tocado no meio do evento de toque.
+    // O redesenho acontece no próximo frame, depois que o navegador encerra o clique.
+    if (dlgPedido.open) {
+      cancelAnimationFrame(renderPedidoRaf);
+      renderPedidoRaf = requestAnimationFrame(() => {
+        renderPedidoRaf = 0;
+        if (dlgPedido.open) renderPedido();
+      });
+    }
   }
 
   /* ---------- início ---------- */

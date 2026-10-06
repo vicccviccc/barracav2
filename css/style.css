@@ -244,6 +244,8 @@ dialog.folha::backdrop { background: rgba(30, 20, 4, 0.62); }
 @keyframes sobe { from { transform: translateY(40px); opacity: 0; } }
 .folha__cab { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: max(16px, env(safe-area-inset-top)) 20px 16px; background: var(--amarelo); border-bottom: 3px solid var(--tinta); flex: 0 0 auto; }
 .folha__cab h2 { font-size: 1.5rem; text-transform: uppercase; }
+.pedido-aviso { flex: 0 0 auto; padding-inline: 20px; background: var(--branco); }
+.pedido-aviso .aviso.aviso--dentro:empty { display: none; margin: 0; padding: 0; }
 .folha__corpo { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; touch-action: pan-y; padding: 18px 20px 28px; }
 .folha__rodape { padding: 12px 20px calc(12px + env(safe-area-inset-bottom)); border-top: 3px solid var(--tinta); background: var(--branco); flex: 0 0 auto; }
 .folha__foto { margin: -18px -20px 16px; border-bottom: 3px solid var(--tinta); background: #efe6d4; }
@@ -329,7 +331,23 @@ legend { padding: 0; margin-bottom: 4px; font: 800 1.05rem/1.2 var(--titulo); te
 
 
 @media (max-width: 699px) {
+  /* O painel do pedido é não-modal no mobile para evitar o bloqueio/inert
+     do navegador ficar preso depois de muitas alterações no carrinho. */
+  dialog#dlg-pedido[open] {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    width: 100%;
+    height: 100vh;
+    height: 100svh;
+    height: 100dvh;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+  }
+
   .folha__cab { padding-left: 16px; padding-right: 16px; }
+  .pedido-aviso { padding-left: 16px; padding-right: 16px; }
   .folha__corpo { padding-left: 16px; padding-right: 16px; }
   .folha__rodape { padding-left: 16px; padding-right: 16px; }
   #dlg-pedido .folha__rodape .btn { min-height: 54px; }
