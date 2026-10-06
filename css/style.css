@@ -458,3 +458,11 @@ legend { padding: 0; margin-bottom: 4px; font: 800 1.05rem/1.2 var(--titulo); te
     font-size: 0.8rem;
   }
 }
+  button,
+  a,
+  [role="button"],
+  input,
+  select,
+  textarea {
+    -webkit-tap-highlight-color: transparent;
+}
