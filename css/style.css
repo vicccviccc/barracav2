@@ -459,45 +459,47 @@ legend { padding: 0; margin-bottom: 4px; font: 800 1.05rem/1.2 var(--titulo); te
   }
 }
 
-/* ---------- teclado em campos no mobile ---------- */
-.campo-com-teclado__rodape {
+/* teclado no mobile */
+.campo-teclado__rodape {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 10px;
-  margin-top: 6px;
+  margin-top: 7px;
 }
 
-.campo-com-teclado__rodape--fim {
-  justify-content: flex-end;
+.campo-teclado__rodape .contagem {
+  margin-top: 0;
+  margin-left: auto;
 }
 
 .teclado-fechar {
   display: none;
-  min-height: 36px;
-  padding: 7px 12px;
+  min-height: 38px;
+  padding: 0 14px;
   border: 2px solid var(--tinta);
-  border-radius: 10px;
-  background: var(--papel, #fff);
+  border-radius: 999px;
+  background: var(--branco);
   color: var(--tinta);
-  font: inherit;
-  font-size: 0.84rem;
-  font-weight: 800;
-  line-height: 1;
+  font: 700 0.88rem/1 var(--corpo);
   cursor: pointer;
-  box-shadow: 2px 2px 0 var(--tinta);
-  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 @media (max-width: 699px) {
-  .campo-com-teclado:focus-within .teclado-fechar {
+  .campo-teclado .teclado-fechar {
     display: inline-flex;
     align-items: center;
     justify-content: center;
   }
+
+  .campo-teclado textarea,
+  .campo-teclado input {
+    scroll-margin-bottom: 72px;
+  }
 }
 
-/* remove o destaque azul de toque sem tirar o foco de teclado */
+/* remove o destaque azul de toque do navegador sem mexer no foco de teclado */
 button,
 a,
 [role="button"],
