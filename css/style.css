@@ -460,7 +460,7 @@ legend { padding: 0; margin-bottom: 4px; font: 800 1.05rem/1.2 var(--titulo); te
 }
 
 /* teclado no mobile */
-.campo-teclado__rodape {
+.campo-com-teclado__rodape {
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -468,7 +468,7 @@ legend { padding: 0; margin-bottom: 4px; font: 800 1.05rem/1.2 var(--titulo); te
   margin-top: 7px;
 }
 
-.campo-teclado__rodape .contagem {
+.campo-com-teclado__rodape .contagem {
   margin-top: 0;
   margin-left: auto;
 }
@@ -487,14 +487,14 @@ legend { padding: 0; margin-bottom: 4px; font: 800 1.05rem/1.2 var(--titulo); te
 }
 
 @media (max-width: 699px) {
-  .campo-teclado .teclado-fechar {
+  .campo-com-teclado .teclado-fechar {
     display: inline-flex;
     align-items: center;
     justify-content: center;
   }
 
-  .campo-teclado textarea,
-  .campo-teclado input {
+  .campo-com-teclado textarea,
+  .campo-com-teclado input {
     scroll-margin-bottom: 72px;
   }
 }
