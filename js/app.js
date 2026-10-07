@@ -166,6 +166,30 @@
     if (el) el.replaceChildren();
   }
 
+  /* ---------- teclado no mobile ---------- */
+  function fecharTeclado() {
+    const ativo = document.activeElement;
+    if (ativo && /^(INPUT|TEXTAREA|SELECT)$/.test(ativo.tagName)) ativo.blur();
+  }
+
+  function acaoTeclado(campo, rotulo = "Concluir") {
+    const btn = h("button", { class: "teclado-fechar", type: "button", text: rotulo, "aria-label": rotulo + " e fechar teclado" });
+    btn.addEventListener("pointerdown", (e) => e.preventDefault());
+    btn.addEventListener("click", () => fecharTeclado());
+    return btn;
+  }
+
+  function fecharTecladoAoTocarFora(container) {
+    if (!container || container.dataset.tecladoFora === "1") return;
+    container.dataset.tecladoFora = "1";
+    container.addEventListener("pointerdown", (e) => {
+      const ativo = document.activeElement;
+      if (!ativo || !/^(INPUT|TEXTAREA|SELECT)$/.test(ativo.tagName)) return;
+      if (e.target.closest("input, textarea, select, button, a, label, [role='button']")) return;
+      fecharTeclado();
+    });
+  }
+
   /* ---------- dados de contato (vêm de config.js) ---------- */
   function preencherContato() {
     $$("[data-link-maps]").forEach((a) => {
@@ -404,7 +428,10 @@
     const contar = () => { contagem.textContent = obs.value.length + "/" + cfg.limiteObsItem; };
     obs.addEventListener("input", contar);
     contar();
-    corpo.append(h("div", null, h("label", { class: "campo-rotulo", for: "prod-obs", text: "Observação (opcional)" }), obs, contagem));
+    corpo.append(h("div", { class: "campo-com-teclado" },
+      h("label", { class: "campo-rotulo", for: "prod-obs", text: "Observação (opcional)" }),
+      obs,
+      h("div", { class: "campo-com-teclado__rodape" }, contagem, acaoTeclado(obs))));
 
     const rodape = h("div", { class: "folha__rodape" },
       h("div", { class: "rodape-prod" },
@@ -441,6 +468,7 @@
       h("div", { class: "folha__cab" }, h("h2", { id: "dlg-produto-titulo", text: p.nome }), botaoFechar()),
       corpo, rodape);
     atualizar();
+    fecharTecladoAoTocarFora(dlgProduto);
     abrir(dlgProduto);
   }
 
@@ -454,6 +482,7 @@
     // Isso também evita camadas antigas interferindo no toque em navegadores móveis.
     limparAviso();
     renderPedido();
+    fecharTecladoAoTocarFora(dlgPedido);
     abrir(dlgPedido);
   }
 
@@ -526,14 +555,30 @@
     });
     nomeCliente.value = cart.nomeCliente;
     nomeCliente.addEventListener("input", () => { cart.definirNomeCliente(nomeCliente.value); atualizarLink(); });
-    corpo.append(h("div", { class: "pedido-cliente" },
+    const nomeBox = h("div", { class: "pedido-cliente campo-com-teclado" },
       h("label", { class: "campo-rotulo", for: "nome-cliente", text: "Nome" }),
-      nomeCliente));
+      nomeCliente,
+      h("div", { class: "campo-com-teclado__rodape campo-com-teclado__rodape--fim" }, acaoTeclado(nomeCliente, "Fechar teclado")));
+    corpo.append(nomeBox);
 
-    const obs = h("textarea", { class: "campo", id: "obs-pedido", maxlength: String(cfg.limiteObsPedido), rows: "2", placeholder: "Ex.: tudo separado" });
+    const obs = h("textarea", {
+      class: "campo", id: "obs-pedido", maxlength: String(cfg.limiteObsPedido), rows: "2",
+      placeholder: "Ex.: tudo separado", enterkeyhint: "done",
+    });
     obs.value = cart.obsPedido;
     obs.addEventListener("input", () => { cart.definirObsPedido(obs.value); atualizarLink(); });
-    corpo.append(h("div", { class: "pedido-obs" }, h("label", { class: "campo-rotulo", for: "obs-pedido", text: "Observação do pedido (opcional)" }), obs));
+    const obsBox = h("div", { class: "pedido-obs campo-com-teclado" },
+      h("label", { class: "campo-rotulo", for: "obs-pedido", text: "Observação do pedido (opcional)" }),
+      obs,
+      h("div", { class: "campo-com-teclado__rodape campo-com-teclado__rodape--fim" }, acaoTeclado(obs)));
+    corpo.append(obsBox);
+
+    // No campo Nome, Enter/Próximo leva direto para a observação.
+    nomeCliente.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      obs.focus();
+    });
 
     /* Como o cliente vai receber o pedido. */
     const recebimentoBox = h("fieldset", { class: "recebimento" },
@@ -566,9 +611,10 @@
     });
     endereco.value = cart.enderecoEntrega;
     endereco.addEventListener("input", () => { cart.definirEnderecoEntrega(endereco.value); atualizarLink(); });
-    const enderecoBox = h("div", { class: "entrega", id: "endereco-box" },
+    const enderecoBox = h("div", { class: "entrega campo-com-teclado", id: "endereco-box" },
       h("label", { class: "campo-rotulo", for: "endereco-entrega", text: "Endereço para entrega" }),
       endereco,
+      h("div", { class: "campo-com-teclado__rodape campo-com-teclado__rodape--fim" }, acaoTeclado(endereco)),
       h("p", { class: "dica", id: "endereco-ajuda", text: "Informe rua, número, bairro e, se precisar, um ponto de referência." }));
     corpo.append(enderecoBox);
 
@@ -631,7 +677,7 @@
     });
     trocoBox.append(trocoEscolhas);
 
-    const trocoValorBox = h("div", { class: "troco__valor", id: "troco-valor-box" },
+    const trocoValorBox = h("div", { class: "troco__valor campo-com-teclado", id: "troco-valor-box" },
       h("label", { class: "campo-rotulo", for: "troco-valor", text: "Troco para quanto?" }));
     const trocoInput = h("input", {
       class: "campo campo--linha", id: "troco-valor", type: "text", inputmode: "decimal", autocomplete: "off",
@@ -646,6 +692,7 @@
       if (cart.trocoPara > 0) trocoInput.value = (cart.trocoPara / 100).toFixed(2).replace(".", ",");
     });
     trocoValorBox.append(trocoInput,
+      h("div", { class: "campo-com-teclado__rodape campo-com-teclado__rodape--fim" }, acaoTeclado(trocoInput)),
       h("p", { class: "dica", id: "troco-ajuda", text: "Informe o valor da nota. Ele precisa ser igual ou maior que o total do pedido." }));
     trocoBox.append(trocoValorBox);
     pagamentoBox.append(trocoBox);

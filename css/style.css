@@ -458,11 +458,51 @@ legend { padding: 0; margin-bottom: 4px; font: 800 1.05rem/1.2 var(--titulo); te
     font-size: 0.8rem;
   }
 }
-  button,
-  a,
-  [role="button"],
-  input,
-  select,
-  textarea {
-    -webkit-tap-highlight-color: transparent;
+
+/* ---------- teclado em campos no mobile ---------- */
+.campo-com-teclado__rodape {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.campo-com-teclado__rodape--fim {
+  justify-content: flex-end;
+}
+
+.teclado-fechar {
+  display: none;
+  min-height: 36px;
+  padding: 7px 12px;
+  border: 2px solid var(--tinta);
+  border-radius: 10px;
+  background: var(--papel, #fff);
+  color: var(--tinta);
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 var(--tinta);
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 699px) {
+  .campo-com-teclado:focus-within .teclado-fechar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* remove o destaque azul de toque sem tirar o foco de teclado */
+button,
+a,
+[role="button"],
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
 }
