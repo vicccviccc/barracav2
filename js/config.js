@@ -8,12 +8,12 @@
 window.BB = window.BB || {};
 
 BB.config = Object.freeze({
-  /* ⚠ NÚMERO PROVISÓRIO — confirmar antes de publicar.
+  /* ⚠ NÚMERO PENDENTE DE CONFIRMAÇÃO — conferir com o responsável antes de publicar.
      Formato: só dígitos, com 55 (Brasil) + DDD + número.
      Atual: +55 84 9121-7386  →  558491217386 */
   whatsapp: "558491217386",
 
-  /* Como o número aparece escrito no site */
+  /* Se trocar o WhatsApp acima, atualizar tambem o numero exibido aqui. */
   whatsappExibicao: "+55 84 9121-7386",
 
   /* Link oficial da localização (Google Maps) */
