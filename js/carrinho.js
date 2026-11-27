@@ -29,6 +29,11 @@ window.BB = window.BB || {};
   const ouvintes = [];
   let contador = 0;
 
+  function centavosValidos(valor) {
+    const numero = Math.floor(Number(valor));
+    return Number.isSafeInteger(numero) && numero >= 0 ? numero : 0;
+  }
+
   /* ---------- formatação ---------- */
   const formatador = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
   const moeda = (centavos) => formatador.format(centavos / 100);
@@ -136,7 +141,7 @@ window.BB = window.BB || {};
       pagamento = ["pix", "cartao", "dinheiro"].includes(dados.pagamento) ? dados.pagamento : "";
       tipoCartao = ["credito", "debito"].includes(dados.tipoCartao) ? dados.tipoCartao : "";
       precisaTroco = dados.precisaTroco === true ? true : dados.precisaTroco === false ? false : null;
-      trocoPara = Math.max(0, Math.floor(Number(dados.trocoPara)) || 0);
+      trocoPara = centavosValidos(dados.trocoPara);
       if (pagamento !== "cartao") tipoCartao = "";
       if (pagamento !== "dinheiro") { precisaTroco = null; trocoPara = 0; }
       if (precisaTroco !== true) trocoPara = 0;
@@ -224,7 +229,7 @@ window.BB = window.BB || {};
     pagamento = copia.pagamento || "";
     tipoCartao = copia.tipoCartao || "";
     precisaTroco = copia.precisaTroco === true ? true : copia.precisaTroco === false ? false : null;
-    trocoPara = Math.max(0, Math.floor(Number(copia.trocoPara)) || 0);
+    trocoPara = centavosValidos(copia.trocoPara);
     mudou();
   }
 
@@ -271,7 +276,7 @@ window.BB = window.BB || {};
   }
 
   function definirTrocoPara(centavos) {
-    trocoPara = Math.max(0, Math.floor(Number(centavos)) || 0);
+    trocoPara = centavosValidos(centavos);
     guardar();
   }
 
